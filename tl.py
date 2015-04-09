@@ -150,9 +150,8 @@ def translate(source_language, target_language, text):
         '&q={2}').format(source_language, target_language, quote(text))
 
     host = urlparse(url).netloc
-    headers = { 'User-Agent': r'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.16) Gecko/20110319 Firefox/3.6.1' }
     client = http.client.HTTPSConnection(host, timeout=3)
-    client.request('GET', url, headers=headers)
+    client.request('GET', url)
     response = client.getresponse()
     encoding = response.headers.get_content_charset()
     content = response.read().decode(encoding)
