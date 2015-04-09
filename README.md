@@ -1,4 +1,4 @@
-sh-translator
+translator
 =============
 
 CLI wrapper for Google Translate. Example output:
