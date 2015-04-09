@@ -4,7 +4,7 @@
 import sys
 import json
 import http.client
-from urllib.parse import urlencode
+from urllib.parse import quote
 from urllib.parse import urlparse
 try:
 	import colorama
@@ -25,6 +25,41 @@ if len(sys.argv) < 4:
 	print('Example: {0} english japanese "Good morning"'.format(sys.argv[0]), file=sys.stderr)
 	sys.exit(1)
 
+def parse(content):
+	data = content
+	data = data.replace('[,', '["",')
+	data = data.replace(',,', ',"",')
+	data = data.replace(',,', ',"",')
+	data = json.loads(data)
+
+	data = \
+	{
+		'sentences':
+		[
+			{
+				'translation': entry[0],
+				'original': entry[1]
+			} for entry in data[0]
+		],
+		'dict':
+		[
+			{
+				'type': entry[0],
+				'basic-list': entry[1],
+				'entries':
+				[
+					{
+						'word': word[0],
+						'reverse_translation': word[1],
+						'importance': float(word[3]) if len(word) > 3 else 0
+					} for word in entry[2]
+				]
+			} for entry in data[1]
+		]
+	}
+
+	return data
+
 try:
 	langSrc = get_language(sys.argv[1].lower())
 	langDest = get_language(sys.argv[2].lower())
@@ -34,43 +69,39 @@ except ValueError as e:
 
 for text in sys.argv[3:]:
 	print('Translating "{0}":'.format(text))
-	data = {'sl': langSrc, 'tl': langDest, 'text': text, 'client': 1}
 
-	try:
-		url = 'http://translate.google.com/translate_a/t?{0}'.format(urlencode(data))
-		host = urlparse(url).netloc
-		headers = { 'User-Agent': r'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.16) Gecko/20110319 Firefox/3.6.1' }
-		client = http.client.HTTPConnection(host, timeout=3)
-		client.request('GET', url, headers=headers)
-		response = client.getresponse()
-		encoding = response.headers.get_content_charset()
-		content = response.read().decode(encoding)
-	except Exception as e:
-		print('error:', e, file=sys.stderr)
-		sys.exit(1)
+	url = 'https://translate.google.com/translate_a/single?client=x&ie=UTF-8&oe=UTF-8&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&dt=at&hl={0}&sl={0}&tl={1}&q={2}'.format(langSrc, langDest, quote(text))
+	host = urlparse(url).netloc
+	headers = { 'User-Agent': r'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.16) Gecko/20110319 Firefox/3.6.1' }
+	client = http.client.HTTPSConnection(host, timeout=3)
+	client.request('GET', url, headers=headers)
+	response = client.getresponse()
+	encoding = response.headers.get_content_charset()
+	content = response.read().decode(encoding)
+	data = parse(content)
 
-	data = json.loads(content)
 	for sentence in data['sentences']:
 		print('  ', end=' ')
 		if colorama:
 			print(colorama.Fore.RED + colorama.Style.BRIGHT, end='')
-		print(sentence['trans'], end=' ')
-		if 'translit' in sentence and sentence['translit']:
+		print(sentence['translation'], end=' ')
+		if 'transliteration' in sentence and sentence['transliteration']:
 			if colorama:
 				print(colorama.Fore.WHITE + colorama.Style.DIM, end='')
-			print('(Transliteration: {0})'.format(sentence['translit']), end='')
+			print('(Transliteration: {0})'.format(sentence['transliteration']), end='')
 	if colorama:
 		print(colorama.Fore.RESET + colorama.Style.RESET_ALL, end='')
 	print()
 
 	if 'dict' in data:
-		for dict in sorted(data['dict'], key = lambda x: len(x['entry'])):
+		for dict in sorted(data['dict'], key = lambda x: len(x['entries'])):
+			max_importance = max(e['importance'] for e in dict['entries'])
 			print()
-			print('Dictionary ({0}):'.format(dict['pos']) if 'pos' in dict and dict['pos'] else 'Dictionary:')
-			for entry in dict['entry']:
-				print('  ', end=' ')
+			print('Dictionary ({0}):'.format(dict['type']) if 'type' in dict and dict['type'] else 'Dictionary:')
+			for entry in dict['entries']:
 				if colorama:
 					print(colorama.Fore.RED, end='')
+				print('  ', end=' ')
 				print(entry['word'], end=' ')
 				if 'reverse_translation' in entry and entry['reverse_translation']:
 					if colorama:
