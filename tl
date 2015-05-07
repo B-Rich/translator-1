@@ -85,14 +85,6 @@ def get_language(code):
             return key
     raise ValueError('Unknown language: {0}'.format(code))
 
-if len(sys.argv) < 4:
-    print('Too few arguments. Usage:', file=sys.stderr)
-    print('{0} source target "text 1" "text 2"'.format(sys.argv[0]),
-        file=sys.stderr)
-    print('Example: {0} english japanese "Good morning"'.format(sys.argv[0]),
-        file=sys.stderr)
-    sys.exit(1)
-
 def parse(content):
     data = content
     data = data.replace('[,', '["",')
@@ -210,6 +202,14 @@ def print_dict(dict):
         print_dict_group(group)
 
 if __name__ == '__main__':
+    if len(sys.argv) < 4:
+        print('Too few arguments. Usage:', file=sys.stderr)
+        print('{0} source target "text 1" "text 2"'.format(sys.argv[0]),
+            file=sys.stderr)
+        print('Example: {0} english japanese "Good morning"'.format(sys.argv[0]),
+            file=sys.stderr)
+        sys.exit(1)
+
     try:
         source_language = get_language(sys.argv[1].lower())
         target_language = get_language(sys.argv[2].lower())
