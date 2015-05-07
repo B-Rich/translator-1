@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
+import os
 import sys
 import json
 import http.client
@@ -203,10 +203,12 @@ def print_dict(dict):
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
-        print('Too few arguments. Usage:', file=sys.stderr)
-        print('{0} source target "text 1" "text 2"'.format(sys.argv[0]),
+        path = os.path.basename(sys.argv[0])
+        print('Too few arguments.', file=sys.stderr)
+        print('', file=sys.stderr)
+        print('Usage: {0} source target "text 1" "text 2"'.format(path),
             file=sys.stderr)
-        print('Example: {0} english japanese "Good morning"'.format(sys.argv[0]),
+        print('Example: {0} english japanese "Good morning"'.format(path),
             file=sys.stderr)
         sys.exit(1)
 
