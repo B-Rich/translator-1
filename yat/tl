@@ -170,7 +170,6 @@ class Printer(object):
         self._print_basic_translation(translation)
 
         if translation.dict:
-            print()
             self._print_dict(translation.dict, show_ratings)
 
     def _set_red_color(self):
@@ -191,12 +190,11 @@ class Printer(object):
         print(translation.translation, end=' ')
         self._reset_color()
 
-        if not translation.transliteration:
-            return
-
-        self._set_translucent_color()
-        print('(Transliteration: %s)' % translation.transliteration, end='')
-        self._reset_color()
+        if translation.transliteration:
+            self._set_translucent_color()
+            print('(Transliteration: %s)' % translation.transliteration, end='')
+            self._reset_color()
+        print()
 
     def _print_importance(self, importance, max_importance):
         self._set_translucent_color()
