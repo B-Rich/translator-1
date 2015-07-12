@@ -92,33 +92,37 @@ def parse(content):
     data = data.replace(',,', ',"",')
     data = json.loads(data)
 
-    data = \
-    {
-        'sentences':
-        [
-            {
-                'translation': entry[0],
-                'original': entry[1]
-            } for entry in data[0]
-        ],
-        'dict':
-        [
-            {
-                'type': entry[0],
-                'basic-list': entry[1],
-                'entries':
-                [
-                    {
-                        'word': word[0],
-                        'reverse': word[1],
-                        'importance': float(word[3]) if len(word) > 3 else 0
-                    } for word in entry[2]
-                ]
-            } for entry in data[1]
-        ]
-    }
+    result = {
+        'sentence': {},
+        'dict': []}
 
-    return data
+    sentences_data = data[0]
+    dict_data = data[1]
+
+    result['sentence']['translation'] = sentences_data[0][0]
+    result['sentence']['original'] = sentences_data[0][1]
+    try:
+        result['sentence']['transliteration'] = sentences_data[1][2]
+        if not result['sentence']['transliteration']:
+            result['sentence']['transliteration'] = sentences_data[1][3]
+    except IndexError:
+        pass
+
+    for entry in dict_data:
+        result['dict'].append({
+            'type': entry[0],
+            'basic-list': entry[1],
+            'entries':
+            [
+                {
+                    'word': word[0],
+                    'reverse': word[1],
+                    'importance': float(word[3]) if len(word) > 3 else 0
+                } for word in entry[2]
+            ]
+        })
+
+    return result
 
 def translate(source_language, target_language, text):
     url = (
@@ -224,8 +228,7 @@ if __name__ == '__main__':
 
         data = translate(source_language, target_language, text)
 
-        for sentence in data['sentences']:
-            print_sentence(sentence)
+        print_sentence(data['sentence'])
         print()
 
         if 'dict' in data:

@@ -6,6 +6,7 @@ Yet another translator using Google Translate API.
 - Any languages
 - Dictionary
 - Reverse translation
+- Transliteration
 - **Colors!** (needs [colorama](https://pypi.python.org/pypi/colorama))
 
 ### Installation
