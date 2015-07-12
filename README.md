@@ -7,6 +7,7 @@ Yet another translator using Google Translate API.
 - Dictionary
 - Reverse translation
 - Transliteration
+- Translation ratings
 - **Colors!** (needs [colorama](https://pypi.python.org/pypi/colorama))
 
 ### Installation

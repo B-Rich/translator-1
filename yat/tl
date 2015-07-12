@@ -180,6 +180,19 @@ def print_sentence(sentence):
     print('(Transliteration: {0})'.format(sentence['transliteration']), end='')
     reset_color()
 
+def print_importance(importance, max_importance):
+    set_translucent_color()
+    blocks = '▏▎▍▌▋▊▉█'
+    max_width = 3
+    if max_importance > 0:
+        importance *= max_width / max_importance
+    else:
+        importance = 0
+    importance = max(0.5, importance)
+    print(blocks[-1] * int(importance), end='')
+    print(blocks[int((importance - int(importance)) * len(blocks))], end='')
+    print(' ' * (max_width - int(importance)), end=' ')
+
 def print_dict_group(group):
     max_importance = max(e['importance'] for e in group['entries'])
     print()
@@ -190,6 +203,7 @@ def print_dict_group(group):
 
     for entry in group['entries']:
         print('  ', end=' ')
+        print_importance(entry['importance'], max_importance)
         set_red_color()
         print(entry['word'], end=' ')
         reset_color()
