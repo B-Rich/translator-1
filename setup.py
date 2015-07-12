@@ -8,7 +8,7 @@ def read(fname):
 setup(
     name             = 'yat',
     packages         = ['yat'],
-    version          = '0.1',
+    version          = '0.1.1',
     description      = 'Yet Another Translator using Google Translate API.',
     long_description = read('README.md'),
     author           = 'rr-',
