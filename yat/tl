@@ -12,213 +12,232 @@ try:
 except ImportError:
     colorama = False
 
-SYNONYMS = {
-    'auto': ['auto', 'detect'],
-    'af': ['af', 'afrikaans'],
-    'sq': ['sq', 'albanian'],
-    'ar': ['ar', 'arabic'],
-    'hy': ['hy', 'armenian'],
-    'az': ['az', 'azerbaijani'],
-    'eu': ['eu', 'basque'],
-    'be': ['be', 'belarusian'],
-    'bn': ['bn', 'bengali'],
-    'bg': ['bg', 'bulgarian'],
-    'ca': ['ca', 'catalan'],
-    'zh-CN': ['cn', 'zh-cn', 'china', 'chinese'],
-    'hr': ['hr', 'croatian'],
-    'cs': ['cs', 'cz', 'czech'],
-    'da': ['da', 'danish'],
-    'nl': ['nl', 'dutch'],
-    'en': ['en', 'eng', 'english'],
-    'et': ['et', 'est', 'estonian'],
-    'tl': ['tl', 'filipino'],
-    'fi': ['fi', 'finnish'],
-    'fr': ['fr', 'french'],
-    'gl': ['gl', 'galician'],
-    'ka': ['ka', 'georgian'],
-    'de': ['de', 'german'],
-    'el': ['el', 'greek'],
-    'gu': ['gu', 'gujarati'],
-    'ht': ['ht', 'haitian', 'creole'],
-    'iw': ['iw', 'hebrew'],
-    'hi': ['hi', 'hindi'],
-    'hu': ['hu', 'hungarian'],
-    'is': ['is', 'icelandic'],
-    'id': ['id', 'indonesian'],
-    'ga': ['ga', 'irish'],
-    'it': ['it', 'italian'],
-    'ja': ['ja', 'jp', 'jap', 'japanese'],
-    'kn': ['kn', 'kannada'],
-    'ko': ['ko', 'korean'],
-    'la': ['la', 'latin'],
-    'lv': ['lv', 'latvian'],
-    'lt': ['lt', 'lithuanian'],
-    'mk': ['mk', 'macedonian'],
-    'ms': ['ms', 'malay'],
-    'mt': ['mt', 'maltese'],
-    'no': ['no', 'norwegian'],
-    'fa': ['fa', 'persian'],
-    'pl': ['pl', 'pol', 'polish'],
-    'pt': ['pt', 'portuguese'],
-    'ro': ['ro', 'romanian'],
-    'ru': ['ru', 'russian'],
-    'sr': ['sr', 'serbian'],
-    'sk': ['sk', 'slovak'],
-    'sl': ['sl', 'slovenian'],
-    'es': ['es', 'spanish'],
-    'sw': ['sw', 'swahili'],
-    'sv': ['sv', 'swedish'],
-    'ta': ['ta', 'tamil'],
-    'te': ['te', 'telugu'],
-    'th': ['th', 'thai'],
-    'tr': ['tr', 'turkish'],
-    'uk': ['uk', 'ukrainian'],
-    'ur': ['ur', 'urdu'],
-    'vi': ['vi', 'vietnamese'],
-    'cy': ['cy', 'welsh'],
-    'yi': ['yi', 'yiddish'],
-}
+class Translator(object):
+    def translate(self, source_language, target_language, text):
+        url = (
+            'https://translate.google.com/translate_a/single' +
+            '?client=x' +
+            '&ie=UTF-8' +
+            '&oe=UTF-8' +
+            '&dt=bd' +
+            '&dt=ex' +
+            '&dt=ld' +
+            '&dt=md' +
+            '&dt=qca' +
+            '&dt=rw' +
+            '&dt=rm' +
+            '&dt=ss' +
+            '&dt=t' +
+            '&dt=at' +
+            '&hl={0}' +
+            '&sl={0}' +
+            '&tl={1}' +
+            '&q={2}').format(source_language, target_language, quote(text))
 
-def get_language(code):
-    for (key, val) in list(SYNONYMS.items()):
-        if code in val:
-            return key
-    raise ValueError('Unknown language: {0}'.format(code))
+        host = urlparse(url).netloc
+        client = http.client.HTTPSConnection(host, timeout=3)
+        client.request('GET', url)
+        response = client.getresponse()
+        encoding = response.headers.get_content_charset()
+        content = response.read().decode(encoding)
+        return self._parse(content)
 
-def parse(content):
-    data = content
-    data = data.replace('[,', '["",')
-    data = data.replace(',,', ',"",')
-    data = data.replace(',,', ',"",')
-    data = json.loads(data)
+    def get_language(self, code):
+        SYNONYMS = {
+            'auto': ['auto', 'detect'],
+            'af': ['af', 'afrikaans'],
+            'sq': ['sq', 'albanian'],
+            'ar': ['ar', 'arabic'],
+            'hy': ['hy', 'armenian'],
+            'az': ['az', 'azerbaijani'],
+            'eu': ['eu', 'basque'],
+            'be': ['be', 'belarusian'],
+            'bn': ['bn', 'bengali'],
+            'bg': ['bg', 'bulgarian'],
+            'ca': ['ca', 'catalan'],
+            'zh-CN': ['cn', 'zh-cn', 'china', 'chinese'],
+            'hr': ['hr', 'croatian'],
+            'cs': ['cs', 'cz', 'czech'],
+            'da': ['da', 'danish'],
+            'nl': ['nl', 'dutch'],
+            'en': ['en', 'eng', 'english'],
+            'et': ['et', 'est', 'estonian'],
+            'tl': ['tl', 'filipino'],
+            'fi': ['fi', 'finnish'],
+            'fr': ['fr', 'french'],
+            'gl': ['gl', 'galician'],
+            'ka': ['ka', 'georgian'],
+            'de': ['de', 'german'],
+            'el': ['el', 'greek'],
+            'gu': ['gu', 'gujarati'],
+            'ht': ['ht', 'haitian', 'creole'],
+            'iw': ['iw', 'hebrew'],
+            'hi': ['hi', 'hindi'],
+            'hu': ['hu', 'hungarian'],
+            'is': ['is', 'icelandic'],
+            'id': ['id', 'indonesian'],
+            'ga': ['ga', 'irish'],
+            'it': ['it', 'italian'],
+            'ja': ['ja', 'jp', 'jap', 'japanese'],
+            'kn': ['kn', 'kannada'],
+            'ko': ['ko', 'korean'],
+            'la': ['la', 'latin'],
+            'lv': ['lv', 'latvian'],
+            'lt': ['lt', 'lithuanian'],
+            'mk': ['mk', 'macedonian'],
+            'ms': ['ms', 'malay'],
+            'mt': ['mt', 'maltese'],
+            'no': ['no', 'norwegian'],
+            'fa': ['fa', 'persian'],
+            'pl': ['pl', 'pol', 'polish'],
+            'pt': ['pt', 'portuguese'],
+            'ro': ['ro', 'romanian'],
+            'ru': ['ru', 'russian'],
+            'sr': ['sr', 'serbian'],
+            'sk': ['sk', 'slovak'],
+            'sl': ['sl', 'slovenian'],
+            'es': ['es', 'spanish'],
+            'sw': ['sw', 'swahili'],
+            'sv': ['sv', 'swedish'],
+            'ta': ['ta', 'tamil'],
+            'te': ['te', 'telugu'],
+            'th': ['th', 'thai'],
+            'tr': ['tr', 'turkish'],
+            'uk': ['uk', 'ukrainian'],
+            'ur': ['ur', 'urdu'],
+            'vi': ['vi', 'vietnamese'],
+            'cy': ['cy', 'welsh'],
+            'yi': ['yi', 'yiddish'],
+        }
 
-    result = {
-        'sentence': {},
-        'dict': []}
+        for (key, val) in list(SYNONYMS.items()):
+            if code in val:
+                return key
+        raise ValueError('Unknown language: {0}'.format(code))
 
-    sentences_data = data[0]
-    dict_data = data[1]
+    def _parse(self, content):
+        data = content
+        data = data.replace('[,', '["",')
+        data = data.replace(',,', ',"",')
+        data = data.replace(',,', ',"",')
+        data = json.loads(data)
 
-    result['sentence']['translation'] = sentences_data[0][0]
-    result['sentence']['original'] = sentences_data[0][1]
-    try:
-        result['sentence']['transliteration'] = sentences_data[1][2]
-        if not result['sentence']['transliteration']:
-            result['sentence']['transliteration'] = sentences_data[1][3]
-    except IndexError:
-        pass
+        result = {
+            'sentence': {},
+            'dict': []}
 
-    for entry in dict_data:
-        result['dict'].append({
-            'type': entry[0],
-            'basic-list': entry[1],
-            'entries':
-            [
-                {
-                    'word': word[0],
-                    'reverse': word[1],
-                    'importance': float(word[3]) if len(word) > 3 else 0
-                } for word in entry[2]
-            ]
-        })
+        sentences_data = data[0]
+        dict_data = data[1]
 
-    return result
+        result['sentence']['translation'] = sentences_data[0][0]
+        result['sentence']['original'] = sentences_data[0][1]
+        try:
+            result['sentence']['transliteration'] = sentences_data[1][2]
+            if not result['sentence']['transliteration']:
+                result['sentence']['transliteration'] = sentences_data[1][3]
+        except IndexError:
+            pass
 
-def translate(source_language, target_language, text):
-    url = (
-        'https://translate.google.com/translate_a/single' +
-        '?client=x' +
-        '&ie=UTF-8' +
-        '&oe=UTF-8' +
-        '&dt=bd' +
-        '&dt=ex' +
-        '&dt=ld' +
-        '&dt=md' +
-        '&dt=qca' +
-        '&dt=rw' +
-        '&dt=rm' +
-        '&dt=ss' +
-        '&dt=t' +
-        '&dt=at' +
-        '&hl={0}' +
-        '&sl={0}' +
-        '&tl={1}' +
-        '&q={2}').format(source_language, target_language, quote(text))
+        for entry in dict_data:
+            result['dict'].append({
+                'type': entry[0],
+                'basic-list': entry[1],
+                'entries':
+                [
+                    {
+                        'word': word[0],
+                        'reverse': word[1],
+                        'importance': float(word[3]) if len(word) > 3 else 0
+                    } for word in entry[2]
+                ]
+            })
 
-    host = urlparse(url).netloc
-    client = http.client.HTTPSConnection(host, timeout=3)
-    client.request('GET', url)
-    response = client.getresponse()
-    encoding = response.headers.get_content_charset()
-    content = response.read().decode(encoding)
-    return parse(content)
+        return result
 
-def set_red_color():
-    if colorama:
-        print(colorama.Fore.RED + colorama.Style.BRIGHT, end='')
+class Printer(object):
+    def __init__(self, text):
+        self.text = text
 
-def set_translucent_color():
-    if colorama:
-        print(colorama.Fore.WHITE + colorama.Style.DIM, end='')
+    def __enter__(self):
+        print('Translating "%s":' % self.text)
+        return self
 
-def reset_color():
-    if colorama:
-        print(colorama.Fore.RESET + colorama.Style.RESET_ALL, end='')
+    def __exit__(self, *args):
+        print()
 
-def print_sentence(sentence):
-    print('  ', end=' ')
-    set_red_color()
-    print(sentence['translation'], end=' ')
-    reset_color()
+    def print_translation(self, data, show_ratings):
+        self._print_sentence(data['sentence'])
 
-    if 'transliteration' not in sentence:
-        return
-    if not sentence['transliteration']:
-        return
+        if 'dict' in data:
+            print()
+            self._print_dict(data['dict'], show_ratings)
 
-    set_translucent_color()
-    print('(Transliteration: {0})'.format(sentence['transliteration']), end='')
-    reset_color()
+    def _set_red_color(self):
+        if colorama:
+            print(colorama.Fore.RED + colorama.Style.BRIGHT, end='')
 
-def print_importance(importance, max_importance):
-    set_translucent_color()
-    blocks = '▏▎▍▌▋▊▉█'
-    max_width = 3
-    if max_importance > 0:
-        importance *= max_width / max_importance
-    else:
-        importance = 0
-    importance = max(0.5, importance)
-    print(blocks[-1] * int(importance), end='')
-    print(blocks[int((importance - int(importance)) * len(blocks))], end='')
-    print(' ' * (max_width - int(importance)), end=' ')
+    def _set_translucent_color(self):
+        if colorama:
+            print(colorama.Fore.WHITE + colorama.Style.DIM, end='')
 
-def print_dict_group(group, show_ratings):
-    max_importance = max(e['importance'] for e in group['entries'])
-    print()
-    if 'type' in group:
-        print('Dictionary ({0}):'.format(group['type']))
-    else:
-        print('Dictionary:')
+    def _reset_color(self):
+        if colorama:
+            print(colorama.Fore.RESET + colorama.Style.RESET_ALL, end='')
 
-    for entry in group['entries']:
+    def _print_sentence(self, sentence):
         print('  ', end=' ')
-        if show_ratings:
-            print_importance(entry['importance'], max_importance)
-        set_red_color()
-        print(entry['word'], end=' ')
-        reset_color()
+        self._set_red_color()
+        print(sentence['translation'], end=' ')
+        self._reset_color()
 
-        if not 'reverse' in entry:
-            continue
+        if 'transliteration' not in sentence:
+            return
+        if not sentence['transliteration']:
+            return
 
-        set_translucent_color()
-        print('(Reverse translation: {0})'.format(', '.join(entry['reverse'])))
-        reset_color()
+        self._set_translucent_color()
+        print('(Transliteration: %s)' % sentence['transliteration'], end='')
+        self._reset_color()
 
-def print_dict(dict, show_ratings):
-    for group in sorted(dict, key = lambda g: len(g['entries'])):
-        print_dict_group(group, show_ratings)
+    def _print_importance(self, importance, max_importance):
+        self._set_translucent_color()
+        blocks = '▏▎▍▌▋▊▉█'
+        max_width = 3
+        if max_importance > 0:
+            importance *= max_width / max_importance
+        else:
+            importance = 0
+        importance = max(0.5, importance)
+        print(blocks[-1] * int(importance), end='')
+        print(blocks[int((importance - int(importance)) * len(blocks))], end='')
+        print(' ' * (max_width - int(importance)), end=' ')
+
+    def _print_dict_group(self, group, show_ratings):
+        max_importance = max(e['importance'] for e in group['entries'])
+        print()
+        if 'type' in group:
+            print('Dictionary ({0}):'.format(group['type']))
+        else:
+            print('Dictionary:')
+
+        for entry in group['entries']:
+            print('  ', end=' ')
+            if show_ratings:
+                self._print_importance(entry['importance'], max_importance)
+            self._set_red_color()
+            print(entry['word'], end=' ')
+            self._reset_color()
+
+            if not 'reverse' in entry:
+                continue
+
+            self._set_translucent_color()
+            print('(Reverse translation: %s)' % ', '.join(entry['reverse']))
+            self._reset_color()
+
+    def _print_dict(self, dict, show_ratings):
+        for group in sorted(dict, key = lambda g: len(g['entries'])):
+            self._print_dict_group(group, show_ratings)
 
 def parse_args():
     import argparse
@@ -238,24 +257,22 @@ def parse_args():
         help='show translation ratings as UTF8 bars')
     return parser.parse_args()
 
-if __name__ == '__main__':
+def main():
     args = parse_args()
 
+    translator = Translator()
+
     try:
-        source_language = get_language(args.source.lower())
-        target_language = get_language(args.target.lower())
+        source_language = translator.get_language(args.source.lower())
+        target_language = translator.get_language(args.target.lower())
     except ValueError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
 
     for text in args.text:
-        print('Translating "{0}":'.format(text))
+        with Printer(text) as printer:
+            data = translator.translate(source_language, target_language, text)
+            printer.print_translation(data, show_ratings=args.ratings)
 
-        data = translate(source_language, target_language, text)
-
-        print_sentence(data['sentence'])
-        print()
-
-        if 'dict' in data:
-            print_dict(data['dict'], args.ratings)
-        print()
+if __name__ == '__main__':
+    main()
