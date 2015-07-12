@@ -17,4 +17,4 @@ Yet another translator using Google Translate API.
 
 ### Example output
 
-![screen](https://cloud.githubusercontent.com/assets/1045476/7074648/73744e58-defc-11e4-9b96-ba4aeb3ca817.png)
+![screen](https://cloud.githubusercontent.com/assets/1045476/8637774/953e3896-28a3-11e5-8eb4-c6adf31effe7.png)
