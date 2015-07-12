@@ -193,7 +193,7 @@ def print_importance(importance, max_importance):
     print(blocks[int((importance - int(importance)) * len(blocks))], end='')
     print(' ' * (max_width - int(importance)), end=' ')
 
-def print_dict_group(group):
+def print_dict_group(group, show_ratings):
     max_importance = max(e['importance'] for e in group['entries'])
     print()
     if 'type' in group:
@@ -203,7 +203,8 @@ def print_dict_group(group):
 
     for entry in group['entries']:
         print('  ', end=' ')
-        print_importance(entry['importance'], max_importance)
+        if show_ratings:
+            print_importance(entry['importance'], max_importance)
         set_red_color()
         print(entry['word'], end=' ')
         reset_color()
@@ -215,29 +216,39 @@ def print_dict_group(group):
         print('(Reverse translation: {0})'.format(', '.join(entry['reverse'])))
         reset_color()
 
-def print_dict(dict):
+def print_dict(dict, show_ratings):
     for group in sorted(dict, key = lambda g: len(g['entries'])):
-        print_dict_group(group)
+        print_dict_group(group, show_ratings)
+
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='Translate sentences using Google Translate API')
+    parser.add_argument(
+        'source', metavar='SOURCE', nargs='?', default='auto',
+        help='Language to translate from (default: auto)')
+    parser.add_argument(
+        'target', metavar='TARGET', nargs='?', default='en',
+        help='Language to translate to (default: en)')
+    parser.add_argument(
+        'text', metavar='TEXT', nargs='+',
+        help='Text to translate')
+    parser.add_argument(
+        '-r', '--ratings', action='store_true',
+        help='show translation ratings as UTF8 bars')
+    return parser.parse_args()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        path = os.path.basename(sys.argv[0])
-        print('Too few arguments.', file=sys.stderr)
-        print('', file=sys.stderr)
-        print('Usage: {0} source target "text 1" "text 2"'.format(path),
-            file=sys.stderr)
-        print('Example: {0} english japanese "Good morning"'.format(path),
-            file=sys.stderr)
-        sys.exit(1)
+    args = parse_args()
 
     try:
-        source_language = get_language(sys.argv[1].lower())
-        target_language = get_language(sys.argv[2].lower())
+        source_language = get_language(args.source.lower())
+        target_language = get_language(args.target.lower())
     except ValueError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
 
-    for text in sys.argv[3:]:
+    for text in args.text:
         print('Translating "{0}":'.format(text))
 
         data = translate(source_language, target_language, text)
@@ -246,5 +257,5 @@ if __name__ == '__main__':
         print()
 
         if 'dict' in data:
-            print_dict(data['dict'])
+            print_dict(data['dict'], args.ratings)
         print()
