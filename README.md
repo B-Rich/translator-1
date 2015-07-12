@@ -1,7 +1,4 @@
-yet another translator
-======================
-
-Yet Another Translator using Google Translate API.
+Yet another translator using Google Translate API.
 
 ### Features
 
