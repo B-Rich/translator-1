@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import http.client
+import time
 import types
 from urllib.parse import quote
 from urllib.parse import urlparse
@@ -17,11 +18,37 @@ Translation = types.SimpleNamespace
 DictionaryGroup = types.SimpleNamespace
 DictionaryEntry = types.SimpleNamespace
 
+
+def RL(a, b):
+    for c in range(0, len(b)-2, 3):
+        d = b[c+2]
+        d = ord(d) - 87 if d >= 'a' else int(d)
+        xa = a & 0xFFFFFFFF
+        d = xa >> d if b[c+1] == '+' else xa << d
+        a = a + d & 4294967295 if b[c] == '+' else a ^ d
+    ret = -(a ^ 0xFFFFFFFF) - 1 if a & 0x80000000 else a
+    return ret
+
+def calc_tk(a):
+    b = int(time.time() / 3600)
+    if sys.version_info >= (3,):
+        d = a.encode('utf-8')
+    else:
+            d = map(ord, a)
+    a = b
+    for di in d:
+        a = RL(a + di, "+-a^+6")
+    a = RL(a, "+-3^+b+-f")
+    a = a if a >= 0 else ((a & 0x7FFFFFFF) + 0x80000000)
+    a %= pow(10, 6)
+    return '%d.%d' % (a, a ^ b)
+
 class Translator(object):
     def translate(self, source_language, target_language, text):
         url = (
             'https://translate.google.com/translate_a/single' +
-            '?client=x' +
+            '?client=t' +
+            '&tk=' + calc_tk(text) +
             '&ie=UTF-8' +
             '&oe=UTF-8' +
             '&dt=bd' +
